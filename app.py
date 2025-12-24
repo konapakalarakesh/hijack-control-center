@@ -27,7 +27,7 @@ st.markdown("""
 if 'processed' not in st.session_state: st.session_state.processed = False
 
 # High-End Banner
-st.markdown('<div class="main-header"><span>AMAZON HIJACK CONTROL CENTER</span><span>A konapaks craetion</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header"><span>AMAZON HIJACK CONTROL CENTER</span><span>A konapaks creation</span></div>', unsafe_allow_html=True)
 
 with st.sidebar:
     st.write("### SYSTEM PARAMETERS")
