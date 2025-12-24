@@ -1,24 +1,29 @@
 import pandas as pd
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor
+import io
 
 def validate_and_read(file):
     try:
-        # High-speed reading for massive datasets
+        # STEP 1: Read file into a memory buffer to bypass ALL "Locked" or "Access" errors
+        file_content = file.read()
+        file_buffer = io.BytesIO(file_content)
+        
         if file.name.endswith(('.xlsx', '.xls')):
-            df = pd.read_excel(file, engine='calamine')
+            # STEP 2: Use openpyxl for maximum compatibility with Streamlit Cloud
+            df = pd.read_excel(file_buffer, engine='openpyxl')
         else:
-            df = pd.read_csv(file)
+            df = pd.read_csv(file_buffer)
             
         required = {'Decision', 'Unique ID', 'Proof of Affiliation Links'}
         if not required.issubset(df.columns):
-            return None, f"HEADER ERROR: {file.name} | Missing required columns."
+            return None, f"COLUMN ERROR: {file.name} | Missing required headers."
         
         df['Source_Auditor'] = file.name
         return df, None
-    except Exception:
-        # Catches locked or corrupted files as seen in image_0d5746.png
-        return None, f"FILE ERROR: {file.name} | Close in Excel and re-upload."
+    except Exception as e:
+        # Returns the specific technical error if it fails for easier troubleshooting
+        return None, f"PROCESSING ERROR: {file.name} | {str(e)}"
 
 def process_hijack_data(uploaded_files, sample_perc, verifiers):
     with ThreadPoolExecutor() as executor:
@@ -43,18 +48,15 @@ def process_hijack_data(uploaded_files, sample_perc, verifiers):
     } for a, g in full_df.groupby('Source_Auditor')])
 
     try:
-        # Group by both Auditor and Decision to pull the percentage from every subgroup
+        # Stratified sampling logic per Auditor and Decision
         sample_df = master_df.groupby(['Source_Auditor', 'Decision'], group_keys=False).apply(
             lambda x: x.sample(frac=sample_perc) if len(x) > 0 else x
         ).reset_index(drop=True)
         
-        # Distribute verifiers evenly across the final combined sample
         if verifiers and not sample_df.empty:
-            # Shuffle so verifiers get a mix of different auditors' work
             sample_df = sample_df.sample(frac=1).reset_index(drop=True)
             sample_df['Assigned_Verifier'] = np.resize(verifiers, len(sample_df))
     except Exception:
-        # Emergency fallback to maintain system stability if data is too small
         sample_df = master_df.sample(frac=sample_perc) if not master_df.empty else master_df
 
     return master_df, pending_df, sample_df, stats_df, []
