@@ -43,12 +43,18 @@ def process_hijack_data(uploaded_files, sample_perc, verifiers):
     } for a, g in full_df.groupby('Source_Auditor')])
 
     try:
-        sample_df = master_df.groupby('Decision', group_keys=False).apply(
+        # Group by both Auditor and Decision to pull the percentage from every subgroup
+        sample_df = master_df.groupby(['Source_Auditor', 'Decision'], group_keys=False).apply(
             lambda x: x.sample(frac=sample_perc) if len(x) > 0 else x
         ).reset_index(drop=True)
-        if verifiers:
+        
+        # Distribute verifiers evenly across the final combined sample
+        if verifiers and not sample_df.empty:
+            # Shuffle so verifiers get a mix of different auditors' work
+            sample_df = sample_df.sample(frac=1).reset_index(drop=True)
             sample_df['Assigned_Verifier'] = np.resize(verifiers, len(sample_df))
-    except:
-        sample_df = master_df.sample(frac=sample_perc)
+    except Exception:
+        # Emergency fallback to maintain system stability if data is too small
+        sample_df = master_df.sample(frac=sample_perc) if not master_df.empty else master_df
 
     return master_df, pending_df, sample_df, stats_df, []
