@@ -74,3 +74,8 @@ def process_hijack_data(uploaded_files, sample_perc, verifiers):
         sample_df = master_df.sample(frac=sample_perc) if not master_df.empty else master_df
 
     return master_df, pending_df, sample_df, stats_df, []
+def to_excel(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    return output.getvalue()

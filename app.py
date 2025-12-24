@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from engine import process_hijack_data
+from engine import process_hijack_data, to_excel # Added to_excel import
 
 # Amazon Corporate Setup
 st.set_page_config(page_title="Amazon Hijack Control", layout="wide", page_icon="👑")
@@ -73,8 +73,9 @@ else:
     
     expA, expB = st.columns(2)
     with expA:
-        st.download_button("Export Final Master Dataset", st.session_state.master.to_csv(index=False), "Master_Final.csv", help="Full database of all completed auditor work.")
-        st.download_button("Export Pending Worklist", st.session_state.pending.to_csv(index=False), "Worklist_Pending.csv", help="Entries with no decision for re-assignment.")
+        # Updated to XLSX to preserve clickable links
+        st.download_button("Export Final Master Dataset", to_excel(st.session_state.master), "Master_Final.xlsx", help="Full database of all completed auditor work.")
+        st.download_button("Export Pending Worklist", to_excel(st.session_state.pending), "Worklist_Pending.xlsx", help="Entries with no decision for re-assignment.")
     with expB:
-        st.download_button("Export Verification Batch", st.session_state.sample.to_csv(index=False), "Auditor_Sample.csv", help="Sampled work for verification.")
-        st.download_button("Export Productivity Report", st.session_state.stats.to_csv(index=False), "Performance.csv", help="Valid/Invalid/Plausible breakdown per auditor.")
+        st.download_button("Export Verification Batch", to_excel(st.session_state.sample), "Auditor_Sample.xlsx", help="Sampled work for verification.")
+        st.download_button("Export Productivity Report", to_excel(st.session_state.stats), "Performance.xlsx", help="Valid/Invalid/Plausible breakdown per auditor.")
