@@ -3,7 +3,7 @@ import pandas as pd
 from engine import process_hijack_data
 
 # Amazon Corporate Setup
-st.set_page_config(page_title="Amazon Hijack Control", layout="wide", page_icon="📦")
+st.set_page_config(page_title="Amazon Hijack Control", layout="wide", page_icon="👑")
 
 # Sleek Industrial CSS
 st.markdown("""
@@ -27,7 +27,7 @@ st.markdown("""
 if 'processed' not in st.session_state: st.session_state.processed = False
 
 # High-End Banner
-st.markdown('<div class="main-header"><span>AMAZON HIJACK CONTROL CENTER</span><span>v4.0 PRO</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header"><span>AMAZON HIJACK CONTROL CENTER</span><span>A konapaks craetion</span></div>', unsafe_allow_html=True)
 
 with st.sidebar:
     st.write("### SYSTEM PARAMETERS")
